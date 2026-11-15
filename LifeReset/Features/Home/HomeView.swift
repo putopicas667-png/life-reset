@@ -11,6 +11,8 @@ struct HomeView: View {
     @Query private var dailyPriorities: [DailyPriority]
     @Query private var xpEvents: [XPEvent]
     @Query private var tasksQ: [TaskItem]
+    @Query private var waterQ: [WaterEntry]
+    @Query private var mealsQ: [MealEntry]
 
     @State private var showSettings = false
     @State private var showSundayReset = false
@@ -23,7 +25,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             TimelineView(.everyMinute) { tl in
-                let _ = occurrences.count + assignments.count + dailyPriorities.count + xpEvents.count + tasksQ.count
+                let _ = occurrences.count + assignments.count + dailyPriorities.count + xpEvents.count + tasksQ.count + waterQ.count + mealsQ.count
                 let now = tl.date
                 let today = Calendar.current.startOfDay(for: now)
                 let nowT = TimeOfDay(date: now)
@@ -37,6 +39,7 @@ struct HomeView: View {
                         nowCard(plan: plan, now: nowT)
                         prioritiesCard(today: today, plan: plan)
                         progressCard(today: today)
+                        healthCard(today: today)
                         if !plan.warnings.isEmpty || !plan.conflicts.isEmpty { warningsCard(plan) }
                         dayCard(plan: plan)
                         if period == .evening || period == .night { tomorrowCard(today: today) }
@@ -154,6 +157,26 @@ struct HomeView: View {
                 StatTile(value: "\(level)", label: "nível")
             }
             ThinProgressBar(value: XPRules.progress(forXP: total))
+        }
+    }
+
+    // MARK: Saúde
+    private func healthCard(today: Date) -> some View {
+        let p = store.profile()
+        let meals = store.meals(on: today)
+        let kcal = Int(meals.reduce(0) { $0 + $1.kcal }), protein = Int(meals.reduce(0) { $0 + $1.protein })
+        let ml = store.waterMl(on: today)
+        return Card(title: "Saúde e rotina", systemImage: "heart.text.square") {
+            HStack {
+                StatTile(value: "\(kcal)", label: "de \(p.dailyKcal) kcal")
+                StatTile(value: "\(protein) g", label: "de \(p.dailyProteinG) g prot.")
+                StatTile(value: Fmt.liters(fromMl: ml), label: "de \(Fmt.liters(fromMl: p.dailyWaterMl))")
+            }
+            HStack {
+                Button("+250 ml") { store.addWater(250) }.buttonStyle(.bordered)
+                Spacer()
+                NavigationLink("Abrir") { HealthHubView() }.buttonStyle(.bordered)
+            }
         }
     }
 

@@ -28,7 +28,7 @@ struct DayDraft: Equatable, Identifiable {
     }
 
     /// Muda o tipo de dia e aplica os horários por omissão do trabalho correspondente.
-    mutating func setKind(_ k: DayKind, store: DataStore) {
+    @MainActor mutating func setKind(_ k: DayKind, store: DataStore) {
         kind = k
         if k.isWork {
             let job = store.job(k == .cafeShift ? .cafe : .burger)
