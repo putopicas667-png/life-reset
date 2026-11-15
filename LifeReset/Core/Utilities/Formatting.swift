@@ -12,6 +12,13 @@ enum Fmt {
         return f.string(from: date).capitalizedFirst
     }
 
+    static func shortDate(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = locale
+        f.setLocalizedDateFormatFromTemplate("dMMM")
+        return f.string(from: date)
+    }
+
     static func number(_ value: Double, decimals: Int = 0) -> String {
         value.formatted(.number.precision(.fractionLength(decimals)).locale(locale))
     }

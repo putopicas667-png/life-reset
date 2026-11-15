@@ -4,8 +4,9 @@ import LifeResetCore
 
 /// Plano de migrações. Ao criar o SchemaV2, acrescenta-se aqui `SchemaV2.self` e a respetiva etapa.
 enum LifeResetMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [SchemaV1.self] }
-    static var stages: [MigrationStage] { [] }
+    static var schemas: [any VersionedSchema.Type] { [SchemaV1.self, SchemaV2.self] }
+    static var stages: [MigrationStage] { [v1ToV2] }
+    static let v1ToV2 = MigrationStage.lightweight(fromVersion: SchemaV1.self, toVersion: SchemaV2.self)
 }
 
 enum Persistence {
@@ -17,7 +18,7 @@ enum Persistence {
     }
 
     static func makeContainer(inMemory: Bool = false) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV1.self)
+        let schema = Schema(versionedSchema: SchemaV2.self)
         let config: ModelConfiguration
         if inMemory {
             config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

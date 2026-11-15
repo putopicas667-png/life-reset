@@ -3,14 +3,20 @@ import SwiftData
 
 /// Decide entre o onboarding (primeira utilização) e a navegação principal.
 struct RootView: View {
+    @Environment(\.modelContext) private var ctx
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var profiles: [UserProfile]
 
     var body: some View {
-        if profiles.first?.onboardingCompleted == true {
-            RootTabView()
-        } else {
-            OnboardingView()
+        Group {
+            if profiles.first?.onboardingCompleted == true {
+                RootTabView()
+            } else {
+                OnboardingView()
+            }
         }
+        .task { @MainActor in Maintenance.run(ctx) }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { Maintenance.run(ctx) } }
     }
 }
 
@@ -34,14 +40,9 @@ struct RootTabView: View {
             .tabItem { Label("Calendar", systemImage: "calendar") }
             .tag(Tab.calendar)
 
-            NavigationStack {
-                PlannedModuleView(title: "Tasks", systemImage: "checklist", phase: "Fase 2",
-                                  summary: "Tarefas fixas e flexíveis, recorrências, três prioridades diárias, higiene e casa.")
-                    .navigationTitle("Tasks")
-            }
-            .lrScreenBackground()
-            .tabItem { Label("Tasks", systemImage: "checklist") }
-            .tag(Tab.tasks)
+            TasksView()
+                .tabItem { Label("Tasks", systemImage: "checklist") }
+                .tag(Tab.tasks)
 
             NavigationStack {
                 PlannedModuleView(title: "Progress", systemImage: "chart.line.uptrend.xyaxis", phase: "Fase 5",
