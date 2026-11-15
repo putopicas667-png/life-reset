@@ -46,9 +46,12 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             build
 
-      - name: Embutir entitlements (App Group)
+      - name: Embutir entitlements (App Group) na extensão de widgets e na app
         run: |
           APP=build/Build/Products/Release-iphoneos/LifeReset.app
+          APPEX="$APP/PlugIns/LifeResetWidgets.appex"
+          ls "$APP/PlugIns"
+          ldid -SWidgets/LifeResetWidgets.entitlements "$APPEX/LifeResetWidgets"
           ldid -SLifeReset/Resources/LifeReset.entitlements "$APP/LifeReset"
 
       - name: Criar .ipa

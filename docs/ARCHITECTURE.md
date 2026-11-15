@@ -3,6 +3,18 @@
 > Documento de referência. Nenhum módulo de funcionalidades é implementado antes de esta arquitetura ser aprovada.
 > Versão 0.1 · 15/11/2026
 
+## Estado da implementação (v0.1)
+
+Todas as fases (0–8) estão implementadas. Diferenças em relação ao plano original:
+
+| Plano | Implementado | Motivo |
+|---|---|---|
+| Widget "Próxima tarefa" com botão "Concluir" (interativo) | Widgets **só de leitura**; concluir faz-se na app ou na ação da notificação | Menos pontos de falha com o sideload gratuito; sem fila `PendingActions` |
+| Passos via HealthKit | **Sem HealthKit** | O entitlement pode impedir a instalação com Apple ID gratuito |
+| Backup em JSON por modelo | Ficheiros da base de dados (+ fotos, opcional) num arquivo cifrado AES-GCM, chave PBKDF2-SHA256 (200 000 iterações) | Cópia completa e fiel; o restauro aplica-se no arranque seguinte |
+| App Group fixo | Tenta `group.<bundle id>` e depois `group.com.lifereset.app` | O AltStore/SideStore pode acrescentar um sufixo aos identificadores |
+| Tempo de ecrã automático | Registo manual | A API Screen Time exige um entitlement da Apple que o sideload não dá |
+
 ---
 
 ## 1. Resumo das decisões

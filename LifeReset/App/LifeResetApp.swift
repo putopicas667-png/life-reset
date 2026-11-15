@@ -9,6 +9,7 @@ struct LifeResetApp: App {
 
     init() {
         containerResult = Result { try Persistence.makeContainer() }
+        if case .success(let c) = containerResult { NotificationService.shared.configure(container: c) }
         configureAppearance()
     }
 

@@ -3,7 +3,18 @@
 Aplicação iOS nativa (Swift + SwiftUI) de gestão pessoal: horários de trabalho, tarefas, saúde, nutrição, treino, finanças, objetivos e viagens. Os dados ficam no iPhone.
 
 - **Arquitetura e plano por fases:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-- **Estado atual:** Fase 0 — estrutura do projeto e pipeline de compilação. As funcionalidades começam na Fase 1.
+- **Estado atual:** fases 0–8 implementadas (ver "Estado da implementação" no topo de `docs/ARCHITECTURE.md`).
+
+## O que a app faz
+- **Home:** próximo compromisso, contagem até sair de casa, 3 prioridades, progresso e XP do dia, saúde, avisos e o dia de amanhã.
+- **Calendar:** vistas de dia, semana e mês com turnos, folgas, Recovery, viagens e compromissos; modo viagem com voos (fusos horários), bagagem e lembretes.
+- **Tasks:** plano do dia, tarefas fixas, ancoradas e flexíveis, recorrências, entrada rápida em português, Sunday Reset, edição do dia com propostas de alteração (nada muda sem aprovação) e reagendamento.
+- **Progress:** nível total e por área, sequências, objetivos, conquistas, estatísticas e observações.
+- **Finance:** entradas, despesas, fixas, previsão do mês (estimativa), orçamentos, dívidas, poupanças, contas, relatórios e importação de CSV.
+- **Saúde e rotina** (a partir da Home): nutrição, água, peso, medidas, fotos privadas, treino, despensa, receitas, compras e produtos pessoais.
+- **Widgets** (só leitura): A seguir, Prioridades, Progresso do dia, Sair de casa, Agenda de hoje (inclui ecrã bloqueado).
+- **Notificações:** tarefas, hora de sair, resumos da manhã e da noite, pagamentos fixos e viagem, com ações "Concluir" e "Adiar 15 min".
+- **Cópia de segurança** cifrada com palavra-passe (Definições).
 
 ## Requisitos
 - iPhone com **iOS 17** ou mais recente

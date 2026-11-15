@@ -10,7 +10,7 @@ packages:
     path: Packages/LifeResetCore
 settings:
   base:
-    MARKETING_VERSION: "0.0.1"
+    MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     SWIFT_STRICT_CONCURRENCY: minimal
@@ -27,6 +27,8 @@ targets:
           - "**/.gitkeep"
     dependencies:
       - package: LifeResetCore
+      - target: LifeResetWidgets
+        embed: true
     scheme:
       testTargets: []
     settings:
@@ -39,4 +41,26 @@ targets:
         CODE_SIGN_ENTITLEMENTS: LifeReset/Resources/LifeReset.entitlements
         # Um Mac com Xcode assina com a equipa escolhida; o CI compila sem assinatura (sideload).
         CODE_SIGN_STYLE: Automatic
-  # O alvo LifeResetWidgets (WidgetKit) entra na Fase 7.
+  LifeResetWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widgets
+        excludes:
+          - "**/.gitkeep"
+          - "Info.plist"
+          - "*.entitlements"
+      - path: Shared
+        excludes:
+          - "**/.gitkeep"
+    settings:
+      base:
+        PRODUCT_NAME: LifeResetWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.lifereset.app.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_FILE: Widgets/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: Widgets/LifeResetWidgets.entitlements
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES

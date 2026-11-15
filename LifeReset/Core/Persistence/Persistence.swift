@@ -18,6 +18,7 @@ enum Persistence {
     }
 
     static func makeContainer(inMemory: Bool = false) throws -> ModelContainer {
+        if !inMemory { Backup.applyPendingRestoreIfNeeded() }
         let schema = Schema(versionedSchema: SchemaV2.self)
         let config: ModelConfiguration
         if inMemory {
@@ -34,7 +35,7 @@ enum Persistence {
     private static func protectStoreFiles() {
         let fm = FileManager.default
         for suffix in ["", "-wal", "-shm"] {
-            let path = storeURL.path() + suffix
+            let path = storeURL.path(percentEncoded: false) + suffix
             if fm.fileExists(atPath: path) {
                 try? fm.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: path)
             }
