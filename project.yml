@@ -1,0 +1,42 @@
+# XcodeGen — gera LifeReset.xcodeproj (no CI ou num Mac: `xcodegen generate`)
+name: LifeReset
+options:
+  bundleIdPrefix: com.lifereset
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: pt-PT
+packages:
+  LifeResetCore:
+    path: Packages/LifeResetCore
+settings:
+  base:
+    MARKETING_VERSION: "0.0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+targets:
+  LifeReset:
+    type: application
+    platform: iOS
+    sources:
+      - path: LifeReset
+        excludes:
+          - "**/.gitkeep"
+      - path: Shared
+        excludes:
+          - "**/.gitkeep"
+    dependencies:
+      - package: LifeResetCore
+    scheme:
+      testTargets: []
+    settings:
+      base:
+        PRODUCT_NAME: LifeReset
+        PRODUCT_BUNDLE_IDENTIFIER: com.lifereset.app
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_FILE: LifeReset/Resources/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: LifeReset/Resources/LifeReset.entitlements
+        # Um Mac com Xcode assina com a equipa escolhida; o CI compila sem assinatura (sideload).
+        CODE_SIGN_STYLE: Automatic
+  # O alvo LifeResetWidgets (WidgetKit) entra na Fase 7.
