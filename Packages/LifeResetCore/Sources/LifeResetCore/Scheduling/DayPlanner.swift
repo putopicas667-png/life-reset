@@ -80,12 +80,13 @@ public enum DayPlanner {
     public static func plan(context ctx: DayContext, tasks: [PlanTask], meals: [MealSlot] = []) -> DayPlan {
         var blocks: [PlanBlock] = []
         var occupied: [TimeRange] = []
+        var workRanges: [TimeRange] = []
         var unplaced: [UnplacedTask] = []
         var conflicts: [String] = []
 
         func add(_ kind: BlockKind, _ title: String, _ r: TimeRange, task: PlanTask? = nil, conflict: Bool = false) {
             blocks.append(PlanBlock(kind: kind, title: title, range: r, taskId: task?.id, isConflict: conflict, done: task?.done ?? false))
-            if kind != .preShift && kind != .workBreak { occupied.append(r) }
+            if kind == .work { workRanges.append(r) } else if kind != .preShift && kind != .workBreak { occupied.append(r) }
         }
 
         // 1. Estrutura do dia
@@ -98,7 +99,11 @@ public enum DayPlanner {
             blocks.append(PlanBlock(kind: .meal, title: m.type.title + (m.note.isEmpty ? "" : " · \(m.note)"), range: m.range,
                                     taskId: nil, isConflict: false, done: false))
         }
-        let workAndCommute = occupied
+        let workAndCommute = occupied + workRanges
+        // Dentro da pausa ou do pré-turno o trabalho não bloqueia; no resto do dia, sim.
+        func avoid(_ w: TimeRange) -> [TimeRange] {
+            ctx.breakWindows.contains { $0.contains(w) } ? occupied : occupied + workRanges
+        }
 
         // 2. Filtros: viagem e recuperação
         var candidates: [PlanTask] = []
@@ -132,7 +137,8 @@ public enum DayPlanner {
                 else if t.location == .home && !ctx.homeWindows.contains(where: { $0.overlaps(window) }) {
                     unplaced.append(UnplacedTask(taskId: t.id, title: t.title, reason: "Sem tempo em casa neste momento do dia")); continue
                 } else { windows = [window] }
-                if let r = firstGap(in: windows, after: cursor, minutes: t.minutes, avoiding: occupied, softEnd: true) {
+                if let r = firstGap(in: windows, after: cursor, minutes: t.minutes, avoiding: avoid(window),
+                                     softEnd: !(anchor == .afterLunch && ctx.workBreak != nil)) {
                     add(.task, t.title, r, task: t); cursor = r.end
                 } else {
                     unplaced.append(UnplacedTask(taskId: t.id, title: t.title, reason: "Não cabe em \(anchor.title.lowercased())"))
@@ -153,7 +159,8 @@ public enum DayPlanner {
             case .anywhere: base = ctx.isTravel ? [ctx.awake] : ctx.homeWindows + ctx.breakWindows
             }
             let windows = base.compactMap { intersect($0, limit) }
-            if let r = firstGap(in: windows, after: TimeOfDay(0), minutes: t.minutes, avoiding: occupied, softEnd: false) {
+            if let r = windows.sorted(by: { $0.start < $1.start }).lazy.compactMap({ w in
+                firstGap(in: [w], after: TimeOfDay(0), minutes: t.minutes, avoiding: avoid(w), softEnd: false) }).first {
                 add(.task, t.title, r, task: t)
             } else {
                 unplaced.append(UnplacedTask(taskId: t.id, title: t.title, reason: "Sem janela livre compatível hoje"))

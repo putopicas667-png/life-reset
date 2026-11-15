@@ -58,3 +58,23 @@ extension Binding where Value == TimeOfDay {
         )
     }
 }
+
+extension Fmt {
+    static func chf(_ v: Decimal, sign: Bool = false) -> String {
+        let n = NSDecimalNumber(decimal: v).doubleValue
+        let s = abs(n).formatted(.number.precision(.fractionLength(2)).locale(Locale(identifier: "de_CH")))
+        let prefix = n < 0 ? "−" : (sign && n > 0 ? "+" : "")
+        return "\(prefix)CHF \(s)"
+    }
+
+    static func monthTitle(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = locale
+        f.setLocalizedDateFormatFromTemplate("MMMMyyyy")
+        return f.string(from: date).capitalizedFirst
+    }
+}
+
+extension Decimal {
+    var double: Double { NSDecimalNumber(decimal: self).doubleValue }
+}
