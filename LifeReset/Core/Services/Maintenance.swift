@@ -9,6 +9,7 @@ enum Maintenance {
         let store = DataStore(ctx: ctx)
         Seeder.seedIfNeeded(store)
         processRollover(store)
+        store.ensureMonthlyReport()
         store.save()
     }
 

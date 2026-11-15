@@ -53,12 +53,7 @@ struct RootTabView: View {
             .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
             .tag(Tab.progress)
 
-            NavigationStack {
-                PlannedModuleView(title: "Finance", systemImage: "francsign.circle", phase: "Fase 4",
-                                  summary: "Rendimentos, despesas, dívidas, poupanças, orçamentos e previsão do mês em CHF.")
-                    .navigationTitle("Finance")
-            }
-            .lrScreenBackground()
+            FinanceView()
             .tabItem { Label("Finance", systemImage: "francsign.circle") }
             .tag(Tab.finance)
         }

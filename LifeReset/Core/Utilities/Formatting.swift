@@ -78,3 +78,12 @@ extension Fmt {
 extension Decimal {
     var double: Double { NSDecimalNumber(decimal: self).doubleValue }
 }
+
+extension Fmt {
+    static func shortMonth(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = locale
+        f.setLocalizedDateFormatFromTemplate("MMM")
+        return f.string(from: date)
+    }
+}
