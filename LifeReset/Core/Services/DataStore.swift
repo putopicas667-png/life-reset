@@ -167,12 +167,39 @@ struct DataStore {
 
     // MARK: Plano do dia
     func planTasks(on date: Date) -> [PlanTask] {
-        tasks(on: date).compactMap { t in
+        let items = tasks(on: date).compactMap { t -> PlanTask? in
             let st = status(t, on: date)
             if st == .skippedToday || st == .rescheduled { return nil }
             return PlanTask(id: t.uid, title: t.title, minutes: t.durationMinutes, priority: t.priority, timing: t.timing,
                             location: t.location, essential: t.essential, heavy: t.heavy, done: st == .done)
         }
+        // Compromissos do calendário entram como blocos fixos (nunca são movidos).
+        let fixedEvents = events(on: date).filter { !$0.allDay }.map { e in
+            PlanTask(id: Self.stableUUID("event|\(e.title)|\(e.start.timeIntervalSince1970)"), title: e.title,
+                     minutes: max(5, Int(e.end.timeIntervalSince(e.start) / 60)), priority: 1,
+                     timing: .fixed(TimeOfDay(date: e.start)), location: .home, essential: true)
+        }
+        return items + fixedEvents
+    }
+
+    func events(on date: Date) -> [CalendarEvent] {
+        let s = cal.startOfDay(for: date), e = LRCalendar.addDays(1, to: s)
+        let d = FetchDescriptor<CalendarEvent>(predicate: #Predicate { $0.start < e && $0.end >= s }, sortBy: [SortDescriptor(\.start)])
+        return (try? ctx.fetch(d)) ?? []
+    }
+
+    /// UUID determinístico a partir de texto (FNV-1a), para blocos que não são tarefas.
+    static func stableUUID(_ s: String) -> UUID {
+        func fnv(_ seed: UInt64) -> UInt64 {
+            var h: UInt64 = seed
+            for b in s.utf8 { h ^= UInt64(b); h = h &* 0x100000001b3 }
+            return h
+        }
+        let a = fnv(0xcbf29ce484222325), b = fnv(0x84222325cbf29ce4)
+        var bytes = [UInt8](repeating: 0, count: 16)
+        for i in 0..<8 { bytes[i] = UInt8((a >> (UInt64(i) * 8)) & 0xff); bytes[i + 8] = UInt8((b >> (UInt64(i) * 8)) & 0xff) }
+        return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
+                           bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]))
     }
 
     func plan(for date: Date, overriding info: DayInfo? = nil) -> DayPlan {

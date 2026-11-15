@@ -31,31 +31,21 @@ struct RootTabView: View {
                 .tabItem { Label("Home", systemImage: "house") }
                 .tag(Tab.home)
 
-            NavigationStack {
-                PlannedModuleView(title: "Calendar", systemImage: "calendar", phase: "Fase 6",
-                                  summary: "Vistas de dia, semana e mês com turnos, folgas, tarefas, treinos, refeições, férias e voos.")
-                    .navigationTitle("Calendar")
-            }
-            .lrScreenBackground()
-            .tabItem { Label("Calendar", systemImage: "calendar") }
-            .tag(Tab.calendar)
+            CalendarTabView()
+                .tabItem { Label("Calendar", systemImage: "calendar") }
+                .tag(Tab.calendar)
 
             TasksView()
                 .tabItem { Label("Tasks", systemImage: "checklist") }
                 .tag(Tab.tasks)
 
-            NavigationStack {
-                PlannedModuleView(title: "Progress", systemImage: "chart.line.uptrend.xyaxis", phase: "Fase 5",
-                                  summary: "XP, níveis, atributos, objetivos, conquistas, sequências e estatísticas.")
-                    .navigationTitle("Progress")
-            }
-            .lrScreenBackground()
-            .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
-            .tag(Tab.progress)
+            ProgressTabView()
+                .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
+                .tag(Tab.progress)
 
             FinanceView()
-            .tabItem { Label("Finance", systemImage: "francsign.circle") }
-            .tag(Tab.finance)
+                .tabItem { Label("Finance", systemImage: "francsign.circle") }
+                .tag(Tab.finance)
         }
         .tint(Theme.accent)
     }

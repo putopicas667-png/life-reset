@@ -36,10 +36,10 @@ extension DataStore {
         let today = cal.startOfDay(for: Date())
         return (1...lastDays).compactMap { i in
             let d = LRCalendar.addDays(-i, to: today)
-            let tasks = tasks(on: d)
-            guard !tasks.isEmpty else { return nil }
-            let done = tasks.filter { status($0, on: d) == .done }.count
-            return Insights.DayRecord(date: d, kind: dayInfo(for: d).info.kind, done: done, total: tasks.count)
+            let list = tasks(on: d)
+            guard !list.isEmpty else { return nil }
+            let done = list.filter { status($0, on: d) == .done }.count
+            return Insights.DayRecord(date: d, kind: dayInfo(for: d).info.kind, done: done, total: list.count)
         }
     }
 }
@@ -272,7 +272,7 @@ struct GoalEditView: View {
         .navigationTitle(goal == nil ? "Novo objetivo" : "Objetivo").navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) { Button("Guardar", action: save).disabled(title.isEmpty) }
-            if goal == nil { ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } } }
+            ToolbarItem(placement: .cancellationAction) { Button(goal == nil ? "Cancelar" : "Fechar") { dismiss() } }
         }
         .onAppear(perform: load)
 
@@ -289,8 +289,8 @@ struct GoalEditView: View {
             return
         }
         title = g.title; area = XPArea(rawValue: g.area) ?? .personal; horizon = g.horizonRaw; metric = g.metric
-        start = Fmt.number(g.startValue, decimals: 1); target = Fmt.number(g.targetValue, decimals: 1)
-        current = Fmt.number(g.currentValue, decimals: 1); auto = g.autoSource
+        start = String(format: "%.1f", g.startValue); target = String(format: "%.1f", g.targetValue)
+        current = String(format: "%.1f", g.currentValue); auto = g.autoSource
         hasDeadline = g.deadline != nil; deadline = g.deadline ?? Date()
     }
 
