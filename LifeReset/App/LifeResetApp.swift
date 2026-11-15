@@ -1,38 +1,58 @@
 import SwiftUI
-import LifeResetCore
+import SwiftData
+import UIKit
 
-/// Ponto de entrada da app.
-/// Fase 0: apenas confirma que o projeto, o pacote Core e o build compilam.
-/// A navegação (5 separadores), o design system e a persistência chegam na Fase 1.
+/// Ponto de entrada: abre a base de dados local e mostra o onboarding ou a navegação principal.
 @main
 struct LifeResetApp: App {
+    private let containerResult: Result<ModelContainer, Error>
+
+    init() {
+        containerResult = Result { try Persistence.makeContainer() }
+        configureAppearance()
+    }
+
     var body: some Scene {
         WindowGroup {
-            BuildCheckView()
-                .preferredColorScheme(.dark)
+            Group {
+                switch containerResult {
+                case .success(let container):
+                    RootView().modelContainer(container)
+                case .failure(let error):
+                    StorageErrorView(error: error)
+                }
+            }
+            .preferredColorScheme(.dark)
+            .tint(Theme.accent)
         }
+    }
+
+    private func configureAppearance() {
+        let tab = UITabBarAppearance()
+        tab.configureWithOpaqueBackground()
+        tab.backgroundColor = UIColor(Theme.surface)
+        UITabBar.appearance().standardAppearance = tab
+        UITabBar.appearance().scrollEdgeAppearance = tab
+
+        let nav = UINavigationBarAppearance()
+        nav.configureWithOpaqueBackground()
+        nav.backgroundColor = UIColor(Theme.background)
+        nav.shadowColor = .clear
+        UINavigationBar.appearance().standardAppearance = nav
+        UINavigationBar.appearance().scrollEdgeAppearance = nav
     }
 }
 
-/// Ecrã técnico temporário da Fase 0 (sem botões nem ações).
-struct BuildCheckView: View {
-    private let now = Date()
+/// Mostrado só se a base de dados não abrir (nunca apaga dados automaticamente).
+struct StorageErrorView: View {
+    let error: Error
 
     var body: some View {
-        VStack(spacing: 12) {
-            Text("LIFE RESET")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-            Text("Fase 0 · estrutura do projeto")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text("Core: \(TimeOfDay(9, 20).description) → \(TimeOfDay(10, 30).description)")
-                .font(.footnote.monospaced())
-                .foregroundStyle(.tertiary)
-            Text("Versão \(AppConfiguration.version) (\(AppConfiguration.build))")
-                .font(.footnote)
-                .foregroundStyle(.tertiary)
+        ContentUnavailableView {
+            Label("Não foi possível abrir os dados", systemImage: "externaldrive.badge.exclamationmark")
+        } description: {
+            Text("Os teus dados não foram apagados. Fecha e volta a abrir a app; se o problema continuar, envia esta mensagem ao programador:\n\n\(error.localizedDescription)")
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(red: 0.06, green: 0.06, blue: 0.07))
+        .lrScreenBackground()
     }
 }
